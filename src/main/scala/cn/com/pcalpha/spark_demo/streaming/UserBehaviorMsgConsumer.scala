@@ -10,6 +10,7 @@ import org.apache.spark.{HashPartitioner, SparkConf}
 
 object UserBehaviorMsgConsumer {
   private val zkServers = "10.33.49.160:2181"
+  private val topics = Array("user-behavior-topic")
   private val processingInterval = 2
   private val checkpointDir = "popularity-data-checkpoint"
   private val msgConsumerGroup = "user-behavior-topic-message-consumer-group"
@@ -23,24 +24,21 @@ object UserBehaviorMsgConsumer {
       ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG -> "10.33.49.160:9092",
       ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG -> classOf[StringDeserializer],
       ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG -> classOf[StringDeserializer],
-      "group.id" -> msgConsumerGroup,
-      "auto.offset.reset" -> "latest",
-      "enable.auto.commit" -> (false: java.lang.Boolean)
+      ConsumerConfig.GROUP_ID_CONFIG -> msgConsumerGroup,
+      ConsumerConfig.AUTO_OFFSET_RESET_CONFIG -> "latest",
+      ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG -> (false: java.lang.Boolean)
     )
 
-    val topics = Array("user-behavior-topic")
+    //kafaka 0.10版本以后使用directStream
     val kafkaStream = KafkaUtils.createDirectStream[String, String](
       ssc,
       PreferConsistent,
       Subscribe[String, String](topics, kafkaParams)
     )
 
-    //val kafkaStream = KafkaUtils.createStream(ssc, zkServers, msgConsumerGroup, Map("user-behavior-topic" -> 3))
+
+    //计算热度
     val msgDataRDD = kafkaStream.map(_.value())
-    //for debug use only
-    //println("Coming data in this interval...")
-    //msgDataRDD.print()
-    // e.g page37|5|1.5119122|-1
     val popularityData = msgDataRDD.map {
       msgLine => {
         val dataArr: Array[String] = msgLine.split("\\|")
@@ -49,6 +47,7 @@ object UserBehaviorMsgConsumer {
         (pageID, popValue)
       }
     }
+
     //sum the previous popularity value and current value
     val updatePopularityValue = (iterator: Iterator[(String, Seq[Double], Option[Double])]) => {
       iterator.flatMap(t => {
@@ -59,7 +58,8 @@ object UserBehaviorMsgConsumer {
     }
 
     val initialRDD = ssc.sparkContext.parallelize(List(("page1", 0.00)))
-    val stateDstream = popularityData.updateStateByKey[Double](updatePopularityValue,
+    val stateDstream = popularityData.updateStateByKey[Double](
+      updatePopularityValue,
       new HashPartitioner(ssc.sparkContext.defaultParallelism),
       true,
       initialRDD
@@ -70,13 +70,18 @@ object UserBehaviorMsgConsumer {
     //after calculation, we need to sort the result and only show the top 10 hot pages
     stateDstream.foreachRDD{
       rdd => {
+        //交换key-value位置，用key排序，即使用热度进行排序
         val sortedData = rdd.map { case (k, v) => (v, k) }.sortByKey(false)
+        //交换key-value位置，换回原来的位置
         val topKData = sortedData.take(10).map { case (v, k) => (k, v) }
+        //打印数据
         topKData.foreach(x => {
           println(x)
         })
+        println("================")
       }
     }
+
     ssc.start()
     ssc.awaitTermination()
   }
