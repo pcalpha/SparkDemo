@@ -4,11 +4,14 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.util.matching.Regex
 
+/**
+  * 计算tomcat日志中 INFO，DEBUG级别日志的数量
+  */
 object LogDemo {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("Word Count") setMaster ("local")
     val context = new SparkContext(conf);
-    val input = context.textFile("testFile\\balarm.balarm-web.debug.log");
+    val input = context.textFile("exampleFile\\balarm.balarm-web.debug.log");
     //不同日志级别计数
     input.filter(line => isValidateLogLine(line))
       .map(line => line.split(" ")(1))

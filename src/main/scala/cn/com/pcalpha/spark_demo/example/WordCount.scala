@@ -3,13 +3,16 @@ package cn.com.pcalpha.spark_demo.example
 import org.apache.spark.{SparkConf, SparkContext}
 import scala.util.matching.Regex
 
+/**
+  * 计算文本文件中出现的单词的数量
+  */
 object WordCount {
   val PARTTERN: Regex ="^\\w+$".r;
 
   def main(args: Array[String]): Unit = {
     val conf  = new SparkConf().setAppName("WordCount").setMaster("local[3]")
     val context = new SparkContext(conf)
-    val textFile = context.textFile("testFile\\Apache Kafka.html");
+    val textFile = context.textFile("exampleFile\\Apache Kafka.html");
     textFile.flatMap(line=>line.split(" "))
       .filter(word=>isValidateWord(word))
       .map(word=>(word,1))
