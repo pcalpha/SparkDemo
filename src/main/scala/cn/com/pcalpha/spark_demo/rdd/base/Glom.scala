@@ -2,6 +2,9 @@ package cn.com.pcalpha.spark_demo.rdd.base
 
 import org.apache.spark.{SparkConf, SparkContext}
 
+/**
+  * 将一个一维横向列表，划分为多个块
+  */
 object Glom {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("WordCount").setMaster("local")
