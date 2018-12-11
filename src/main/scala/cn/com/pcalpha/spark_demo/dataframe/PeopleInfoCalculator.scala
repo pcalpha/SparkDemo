@@ -33,22 +33,21 @@ object PeopleInfoCalculator {
     val conf = new SparkConf().setAppName("Avg age") setMaster ("local")
     val context = new SparkContext(conf)
 
-    var peopleDataRDD = context.textFile("exampleFile\\sample_people_data.txt")
+    var peopleDataRDD = context.textFile("exampleFile\\sample_people_data2.txt")
 
     val schemaArray = schemaString.split(",")
     val schema = StructType(schemaArray.map(fieldName => StructField(fieldName, StringType, true)))
 
-    val sqlCtx = new SQLContext(context)
+
     val rowRDD: RDD[Row] = peopleDataRDD
       .map(_.split(" "))
       .map(eachRow => Row(eachRow(0), eachRow(1), eachRow(2)))
 
-    val peopleDF = sqlCtx.createDataFrame(rowRDD, schema)
-    peopleDF.createOrReplaceTempView("people")
-
     /**
       * spark sql
       */
+    val sqlCtx = new SQLContext(context)
+
     //用 SQL 语句的方式统计男性中身高超过 180cm 的人数。
     val higherMale180 = sqlCtx.sql("select id,gender, height from people where height > 180 and gender='M'")
     println(higherMale180.count())
@@ -60,6 +59,8 @@ object PeopleInfoCalculator {
     /**
       * dataframe
       */
+    val peopleDF = sqlCtx.createDataFrame(rowRDD, schema)
+    peopleDF.createOrReplaceTempView("people")
 
     // 对人群按照性别分组并统计男女人数。
     peopleDF.groupBy(peopleDF("gender")).count().show()
@@ -84,7 +85,7 @@ object PeopleInfoCalculator {
     val conf = new SparkConf().setAppName("Avg age") setMaster ("local")
     val context = new SparkContext(conf)
 
-    val writer = new FileWriter(new File("exampleFile\\sample_people_data.txt"), false)
+    val writer = new FileWriter(new File("exampleFile\\sample_people_data2.txt"), false)
     var rand = new Random()
     for (i <- 1 to 10000) {
       var gender = if (rand.nextBoolean()) "M" else "F"
