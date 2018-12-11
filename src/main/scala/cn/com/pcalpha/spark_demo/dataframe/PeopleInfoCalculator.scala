@@ -11,7 +11,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 /**
   * 目标：
   * 用 SQL 语句的方式统计男性中身高超过 180cm 的人数。
-  * 用 SQL 语句的方式统计女性中身高超过 170cm 的人数。
+  * 用 SQL 语句的方式统计女性中身高超过 160cm 的人数。
   * 对人群按照性别分组并统计男女人数。
   * 用类 RDD 转换的方式对 DataFrame 操作来统计并打印身高大于 210cm 的前 50 名男性。
   * 对所有人按身高进行排序并打印前 50 名的信息。
@@ -29,7 +29,7 @@ object PeopleInfoCalculator {
     calculate()
   }
 
-  def calculate():Unit={
+  def calculate(): Unit = {
     val conf = new SparkConf().setAppName("Avg age") setMaster ("local")
     val context = new SparkContext(conf)
 
@@ -46,22 +46,35 @@ object PeopleInfoCalculator {
     val peopleDF = sqlCtx.createDataFrame(rowRDD, schema)
     peopleDF.createOrReplaceTempView("people")
 
-    //spark sql
+    /**
+      * spark sql
+      */
+    //用 SQL 语句的方式统计男性中身高超过 180cm 的人数。
     val higherMale180 = sqlCtx.sql("select id,gender, height from people where height > 180 and gender='M'")
     println(higherMale180.count())
 
-    val higherFemale160  = sqlCtx.sql("select id,gender, height from people where height > 160 and gender='F'")
-    println(higherFemale160 .count())
+    //用 SQL 语句的方式统计女性中身高超过 160cm 的人数。
+    val higherFemale160 = sqlCtx.sql("select id,gender, height from people where height > 160 and gender='F'")
+    println(higherFemale160.count())
 
-    //dataframe
+    /**
+      * dataframe
+      */
+
+    // 对人群按照性别分组并统计男女人数。
     peopleDF.groupBy(peopleDF("gender")).count().show()
     println("People Count Grouped By Gender")
-    //peopleDF.filter(peopleDF("gender").equalTo("M")).filter(peopleDF("height") > 180).show(50)
 
-    //peopleDF.sort(peopleDF("height").desc).take(50).foreach { row => println(row(0) + "," + row(1) + "," + row(2)) }
+    //用类 RDD 转换的方式对 DataFrame 操作来统计并打印身高大于 180cm 的前 50 名男性。
+    peopleDF.filter(peopleDF("gender").equalTo("M")).filter(peopleDF("height") > 180).show(50)
 
+    // 对所有人按身高进行排序并打印前 50 名的信息。
+    peopleDF.sort(peopleDF("height").desc).take(50).foreach { row => println(row(0) + "," + row(1) + "," + row(2)) }
+
+    //统计男性的平均身高
     peopleDF.filter(peopleDF("gender").equalTo("M")).agg(Map("height" -> "avg")).show()
 
+    //统计女性身高的最大值
     peopleDF.filter(peopleDF("gender").equalTo("F")).agg("height" -> "max").show()
 
   }
@@ -76,9 +89,9 @@ object PeopleInfoCalculator {
     for (i <- 1 to 10000) {
       var gender = if (rand.nextBoolean()) "M" else "F"
       var height = 0;
-      if(gender=="M"){
+      if (gender == "M") {
         height = 150 + rand.nextInt(50)
-      }else if(gender=="F"){
+      } else if (gender == "F") {
         height = 140 + rand.nextInt(30)
       }
 
