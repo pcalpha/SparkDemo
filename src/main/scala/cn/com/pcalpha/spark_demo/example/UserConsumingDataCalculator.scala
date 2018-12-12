@@ -1,5 +1,12 @@
 package cn.com.pcalpha.spark_demo.example
 
+import java.io.FileWriter
+import java.util.Random
+
+import org.apache.spark.sql.SQLContext
+import org.apache.spark.storage.StorageLevel
+import org.apache.spark.{SparkConf, SparkContext}
+
 /**
   *通过用户数据和交易订单数据，关联查询用户和订单信息
   */
