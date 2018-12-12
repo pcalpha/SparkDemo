@@ -1,11 +1,11 @@
-package cn.com.pcalpha.spark_demo.dataframe
+package cn.com.pcalpha.spark_demo.example
 
 import java.io.{File, FileWriter}
 import java.util.Random
 
 import org.apache.spark.rdd.RDD
-import org.apache.spark.sql.{Row, SQLContext}
 import org.apache.spark.sql.types.{StringType, StructField, StructType}
+import org.apache.spark.sql.{Row, SQLContext}
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
@@ -18,7 +18,7 @@ import org.apache.spark.{SparkConf, SparkContext}
   * 统计男性的平均身高。
   * 统计女性身高的最大值。
   */
-object PeopleInfoCalculator {
+object PeopleInfoCalculator2 {
   private val schemaString = "id,gender,height"
   private val wordSeparator = " "
   private val lineSeparator = System.getProperty("line.separator")
