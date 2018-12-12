@@ -8,12 +8,15 @@ object MapPartitionsWithIndex {
     val conf = new SparkConf().setAppName("WordCount").setMaster("local")
     val sc = new SparkContext(conf)
 
-    var rdd1:RDD[Int] = sc.parallelize(Array(1,2,3,4,5,6,7));
-    rdd1.mapPartitionsWithIndex(function).collect().foreach(println)
+    var rdd1:RDD[Int] = sc.parallelize(Array(1,2,3,4,5,6,7),2);
+    rdd1.mapPartitionsWithIndex(function).glom().foreach(e=>{e.foreach(println);println()})
   }
 
   def function(partionIndex:Int,iterator: Iterator[Int]):Iterator[Int] ={
-    var res = for(e<-iterator) yield e*2
+    var res = for(e<-iterator) yield e;
+    if(partionIndex==0){
+      res = for(e<-iterator) yield e*2
+    }
     return res
   }
 }

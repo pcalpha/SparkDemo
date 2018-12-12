@@ -2,6 +2,7 @@ package cn.com.pcalpha.spark_demo.rdd.pair
 
 import org.apache.spark.{SparkConf, SparkContext}
 
+
 object FlatMapValues {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("WordCount").setMaster("local")

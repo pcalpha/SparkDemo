@@ -2,6 +2,10 @@ package cn.com.pcalpha.spark_demo.rdd.pair
 
 import org.apache.spark.{SparkConf, SparkContext}
 
+/**
+  * 具体参考aggregate，对pair的value进行aggregate计算
+  * @link cn.com.pcalpha.spark_demo.rdd.base.Aggregate
+  */
 object AggregateByKey {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("WordCount").setMaster("local")

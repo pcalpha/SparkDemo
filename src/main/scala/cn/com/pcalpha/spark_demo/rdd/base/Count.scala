@@ -10,9 +10,7 @@ object Count {
     var rdd = sc.parallelize(List(1,2,3,4,5))
     println(rdd.count())
 
-
-    var rdd2 = sc.parallelize(List(("a",1),("b",1),("c",1),("a",3)))
-    rdd2.countByKey().foreach(println)
+    println("===========")
 
     var rdd3 = sc.parallelize(List("a","b","c","a","b"))
     rdd3.countByValue().foreach(println)
