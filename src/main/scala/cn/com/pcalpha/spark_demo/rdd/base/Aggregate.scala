@@ -4,7 +4,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 
 /**
   * aggregate接收一个初始化值和两个函数。
-  * seqOp函数用于聚集每一个分区，
+  * seqOp函数用于聚集一个分区内的数据，
   * combOp用于聚集所有分区聚集后的结果。
   */
 object Aggregate {
