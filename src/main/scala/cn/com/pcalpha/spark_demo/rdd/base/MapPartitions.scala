@@ -24,7 +24,6 @@ object MapPartitions {
   }
 
   def function(iterator: Iterator[Int]):Iterator[Int] ={
-    var res = for(e<-iterator) yield e*2
-    return res
+     for(e<-iterator) yield e*2
   }
 }
