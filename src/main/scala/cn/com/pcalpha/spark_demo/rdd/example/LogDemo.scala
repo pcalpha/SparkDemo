@@ -1,4 +1,4 @@
-package cn.com.pcalpha.spark_demo.example
+package cn.com.pcalpha.spark_demo.rdd.example
 
 import org.apache.spark.{SparkConf, SparkContext}
 

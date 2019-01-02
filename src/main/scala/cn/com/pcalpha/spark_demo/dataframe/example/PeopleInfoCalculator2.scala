@@ -1,4 +1,4 @@
-package cn.com.pcalpha.spark_demo.example
+package cn.com.pcalpha.spark_demo.dataframe.example
 
 import java.io.{File, FileWriter}
 import java.util.Random

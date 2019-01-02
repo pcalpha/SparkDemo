@@ -1,10 +1,9 @@
-package cn.com.pcalpha.spark_demo.example
+package cn.com.pcalpha.spark_demo.rdd.example
 
 import java.io.{File, FileWriter}
 import java.util.Random
 
 import org.apache.spark.{SparkConf, SparkContext}
-
 
 /**
   * 该案例中，我们将假设我们需要统计一个 1000 万人口的所有人的平均年龄，
