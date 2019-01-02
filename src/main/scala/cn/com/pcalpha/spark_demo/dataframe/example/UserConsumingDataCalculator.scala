@@ -3,7 +3,7 @@ package cn.com.pcalpha.spark_demo.dataframe.example
 import java.io.FileWriter
 import java.util.Random
 
-import org.apache.spark.sql.SQLContext
+import org.apache.spark.sql.{SQLContext, SparkSession}
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.{SparkConf, SparkContext}
 
@@ -29,28 +29,32 @@ object UserConsumingDataCalculator {
   }
 
   def calculate(): Unit = {
-    val conf = new SparkConf().setAppName("Avg age") setMaster ("local")
-    val context = new SparkContext(conf)
+    val spark = SparkSession
+      .builder()
+      .appName("Spark SQL basic example")
+      .config("spark.some.config.option", "some-value")
+      .master("local")
+      .getOrCreate()
 
-    var userDataRDD = context.textFile("exampleFile\\sample_user_data.txt")
-    var orderDataRDD = context.textFile("exampleFile\\sample_consume_data.txt")
+    import spark.implicits._
 
-    val sqlCtx = new SQLContext(context)
-    import sqlCtx.implicits._
-
-    val userDF = userDataRDD
+    val userDF = spark.sparkContext
+      .textFile("exampleFile\\sample_user_data.txt")
       .map(_.split(" "))
       .map(u => User(u(0), u(1), u(2).toInt,u(3),u(4),u(5)))
       .toDF()
     userDF.createOrReplaceTempView("user")
     userDF.persist(StorageLevel.MEMORY_ONLY_SER)
 
-    val orderDF = orderDataRDD
+    val orderDF = spark.sparkContext
+      .textFile("exampleFile\\sample_consume_data.txt")
       .map(_.split(" "))
       .map(o=>Order(o(0),o(1),o(2).toInt,o(3).toInt,o(4)))
       .toDF()
     orderDF.createOrReplaceTempView("orders")
     orderDF.persist(StorageLevel.MEMORY_ONLY_SER)
+
+    var sqlCtx = spark.sqlContext
 
 //    val count = orderDF
 //      .filter(orderDF("orderDate").contains("2015"))

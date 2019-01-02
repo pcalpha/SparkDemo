@@ -1,11 +1,12 @@
-package cn.com.pcalpha.spark_demo.dataframe.example
+package cn.com.pcalpha.spark_demo.dataset.example
 
 import java.io.{File, FileWriter}
 import java.util.Random
 
+import org.apache.spark
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.types.{StringType, StructField, StructType}
-import org.apache.spark.sql.{Row, SQLContext}
+import org.apache.spark.sql.{Row, SQLContext, SparkSession}
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
@@ -30,24 +31,27 @@ object PeopleInfoCalculator2 {
   }
 
   def calculate(): Unit = {
-    val conf = new SparkConf().setAppName("Avg age") setMaster ("local")
-    val context = new SparkContext(conf)
+    val spark = SparkSession
+      .builder()
+      .appName("Spark SQL basic example")
+      .config("spark.some.config.option", "some-value")
+      .master("local")
+      .getOrCreate()
 
-    var peopleDataRDD = context.textFile("exampleFile\\sample_people_data2.txt")
+    import spark.implicits._
 
-    val schemaArray = schemaString.split(",")
-    val schema = StructType(schemaArray.map(fieldName => StructField(fieldName, StringType, true)))
-
-
-    val rowRDD: RDD[Row] = peopleDataRDD
+    val peopleDF = spark
+      .sparkContext
+      .textFile("exampleFile\\sample_people_data2.txt")
       .map(_.split(" "))
-      .map(eachRow => Row(eachRow(0), eachRow(1), eachRow(2)))
+      .map(eachRow => Person(eachRow(0).trim.toInt, eachRow(1), eachRow(2).trim.toInt))
+      .toDF()
 
     /**
       * spark sql
       */
-    val sqlCtx = new SQLContext(context)
-
+    val sqlCtx = peopleDF.sqlContext
+    peopleDF.createOrReplaceTempView("people")
     //用 SQL 语句的方式统计男性中身高超过 180cm 的人数。
     val higherMale180 = sqlCtx.sql("select id,gender, height from people where height > 180 and gender='M'")
     println(higherMale180.count())
@@ -59,8 +63,7 @@ object PeopleInfoCalculator2 {
     /**
       * dataframe
       */
-    val peopleDF = sqlCtx.createDataFrame(rowRDD, schema)
-    peopleDF.createOrReplaceTempView("people")
+
 
     // 对人群按照性别分组并统计男女人数。
     peopleDF.groupBy(peopleDF("gender")).count().show()
@@ -101,5 +104,9 @@ object PeopleInfoCalculator2 {
     }
     writer.flush()
     writer.close()
+  }
+
+  case class Person(id:Int,gender:String,height:Int){
+
   }
 }
