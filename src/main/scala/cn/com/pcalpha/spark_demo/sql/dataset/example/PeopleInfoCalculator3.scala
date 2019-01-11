@@ -2,6 +2,8 @@ package cn.com.pcalpha.spark_demo.sql.dataset.example
 
 import java.io.{File, FileWriter}
 import java.util.Random
+
+import org.apache.spark.sql.types.{StringType, StructField, StructType}
 import org.apache.spark.sql.{Row, SQLContext, SparkSession}
 import org.apache.spark.{SparkConf, SparkContext}
 
@@ -42,6 +44,16 @@ object PeopleInfoCalculator3 {
       .map(_.split(" "))
       .map(eachRow => Person(eachRow(0).trim.toInt, eachRow(1), eachRow(2).trim.toInt))
       .toDF().as[Person]
+
+//    val schemaString = "id gender height"
+//    val schema = StructType(schemaString.split(" ")
+//      .map(fieldName => StructField(fieldName, StringType, nullable = true)))
+//    val peopleRDD = spark
+//      .sparkContext
+//      .textFile("exampleFile\\sample_people_data2.txt")
+//      .map(_.split(" "))
+//      .map(attributes => Row(attributes(0), attributes(1).toString, attributes(0)))
+//    val peopleDS = spark.createDataFrame(peopleRDD, schema)
 
 
     /**
