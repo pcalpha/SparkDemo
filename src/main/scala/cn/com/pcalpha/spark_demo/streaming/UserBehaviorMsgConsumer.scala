@@ -52,8 +52,8 @@ object UserBehaviorMsgConsumer {
     val updatePopularityValue = (iterator: Iterator[(String, Seq[Double], Option[Double])]) => {
       iterator.flatMap(t => {
         val newValue: Double = t._2.sum
-        val stateValue: Double = t._3.getOrElse(0);
-        Some(newValue + stateValue)
+        val oldValue: Double = t._3.getOrElse(0);
+        Some(newValue + oldValue)
       }.map(sumedValue => (t._1, sumedValue)))
     }
 
